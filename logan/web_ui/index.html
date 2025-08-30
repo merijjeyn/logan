@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logan Log Viewer</title>
+    <link rel="stylesheet" href="/web_ui/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Logan Log Viewer</h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="type-filter">Filter by Type:</label>
+                    <select id="type-filter" multiple>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                        <option value="debug">Debug</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="namespace-filter">Filter by Namespace:</label>
+                    <select id="namespace-filter" multiple>
+                        <option value="global">global</option>
+                    </select>
+                </div>
+                <button id="clear-filters">Clear Filters</button>
+                <button id="clear-logs">Clear Logs</button>
+            </div>
+        </header>
+        
+        <div id="logs-container" class="logs-container">
+            <div id="no-logs" class="no-logs">No logs yet. Waiting for messages...</div>
+            <div id="logs" class="logs"></div>
+        </div>
+    </div>
+
+    <script src="/web_ui/app.js"></script>
+</body>
+</html>

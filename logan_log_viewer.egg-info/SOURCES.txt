@@ -1,0 +1,15 @@
+setup.py
+logan/__init__.py
+logan/client.py
+logan/server.py
+logan/assets/__init__.py
+logan/assets/ascii_art.txt
+logan/web_ui/__init__.py
+logan/web_ui/app.js
+logan/web_ui/index.html
+logan/web_ui/styles.css
+logan_log_viewer.egg-info/PKG-INFO
+logan_log_viewer.egg-info/SOURCES.txt
+logan_log_viewer.egg-info/dependency_links.txt
+logan_log_viewer.egg-info/requires.txt
+logan_log_viewer.egg-info/top_level.txt

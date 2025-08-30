@@ -18,7 +18,7 @@ A simple, real-time log viewer for Python applications with a beautiful dark-the
 ### Installation
 
 ```bash
-pip install git+https://github.com/yourusername/logan.git
+pip install git+https://github.com/merijjeyn/logan.git
 ```
 
 ### Basic Usage
@@ -59,6 +59,7 @@ After calling `Logan.init()`, open your browser to the URL displayed in the cons
 Starts the Logan web server.
 
 **Parameters:**
+
 - `port` (int, optional): Port number for the web server. Defaults to 5000.
 
 ### `Logan.log(message, type="info", namespace="global", exception=None)`
@@ -66,6 +67,7 @@ Starts the Logan web server.
 Sends a log message to the web viewer.
 
 **Parameters:**
+
 - `message` (str): The log message
 - `type` (str, optional): Log type - "info", "warning", "error", or "debug". Defaults to "info".
 - `namespace` (str, optional): Namespace/component name for organizing logs. Defaults to "global".
@@ -74,6 +76,7 @@ Sends a log message to the web viewer.
 ## Examples
 
 ### Web Application Logging
+
 ```python
 from logan import Logan
 from flask import Flask
@@ -100,6 +103,7 @@ def get_users():
 ```
 
 ### Data Processing Pipeline
+
 ```python
 from logan import Logan
 import pandas as pd
@@ -108,23 +112,23 @@ Logan.init()
 
 def process_data(filename):
     Logan.log(f"Starting data processing for {filename}", namespace="pipeline")
-    
+
     try:
         # Load data
         Logan.log("Loading CSV file", type="debug", namespace="io")
         df = pd.read_csv(filename)
         Logan.log(f"Loaded {len(df)} records", type="info", namespace="io")
-        
+
         # Process data
         Logan.log("Applying transformations", type="debug", namespace="transform")
         df_processed = df.dropna().reset_index(drop=True)
         Logan.log(f"Cleaned data: {len(df_processed)} records remaining", namespace="transform")
-        
+
         # Save results
         output_file = f"processed_{filename}"
         df_processed.to_csv(output_file, index=False)
         Logan.log(f"Results saved to {output_file}", type="info", namespace="io")
-        
+
     except FileNotFoundError as e:
         Logan.log(f"Input file not found: {filename}", type="error", namespace="io", exception=e)
     except Exception as e:
@@ -138,7 +142,7 @@ process_data("data.csv")
 To set up for development:
 
 ```bash
-git clone https://github.com/yourusername/logan.git
+git clone https://github.com/merijjeyn/logan.git
 cd logan
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate

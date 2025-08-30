@@ -1,11 +1,16 @@
 class LogViewer {
     constructor() {
+        this.MAX_LOGS = 1000; // Sliding window limit
         this.logs = [];
         this.filteredLogs = [];
         this.namespaces = new Set(['global']);
         this.eventSource = null;
         this.currentExpandedIndex = null;
         this.autoScrollEnabled = true;
+        
+        // Debounced rendering to prevent render spam
+        this.renderTimeout = null;
+        this.RENDER_DEBOUNCE_MS = 16; // ~60fps
         
         this.initializeElements();
         this.attachEventListeners();
@@ -63,6 +68,15 @@ class LogViewer {
                 }
             }
         });
+        
+        // EVENT DELEGATION: Single listener for all log clicks (prevents memory leaks)
+        this.logsContainer.addEventListener('click', (event) => {
+            const logEntry = event.target.closest('.log-entry');
+            if (logEntry) {
+                const index = parseInt(logEntry.dataset.index);
+                this.toggleLogDetails(index);
+            }
+        });
     }
     
     connectEventSource() {
@@ -84,6 +98,11 @@ class LogViewer {
     addLog(logData) {
         this.logs.push(logData);
         
+        // Sliding window: prevent unbounded memory growth
+        if (this.logs.length > this.MAX_LOGS) {
+            this.logs.shift(); // Remove oldest log
+        }
+        
         // Add namespace to the filter dropdown if it's new
         const isNewNamespace = !this.namespaces.has(logData.namespace);
         if (isNewNamespace) {
@@ -91,10 +110,7 @@ class LogViewer {
             this.updateNamespaceFilter(logData.namespace);
         }
         
-        this.applyFilters();
-        if (this.autoScrollEnabled) {
-            this.scrollToBottom();
-        }
+        this.debouncedRender();
     }
     
     updateNamespaceFilter(newNamespace = null) {
@@ -142,6 +158,22 @@ class LogViewer {
         this.renderLogs();
     }
     
+    debouncedRender() {
+        // Cancel previous render if pending
+        if (this.renderTimeout) {
+            clearTimeout(this.renderTimeout);
+        }
+        
+        // Schedule new render
+        this.renderTimeout = setTimeout(() => {
+            this.applyFilters();
+            if (this.autoScrollEnabled) {
+                this.scrollToBottom();
+            }
+            this.renderTimeout = null;
+        }, this.RENDER_DEBOUNCE_MS);
+    }
+    
     renderLogs() {
         if (this.filteredLogs.length === 0) {
             this.noLogsElement.style.display = 'block';
@@ -177,10 +209,7 @@ class LogViewer {
             </div>
         `;
         
-        logDiv.addEventListener('click', () => {
-            this.toggleLogDetails(index);
-        });
-        
+        // Event listener removed - using event delegation instead
         return logDiv;
     }
     
@@ -252,7 +281,12 @@ class LogViewer {
     }
     
     scrollToBottom() {
-        this.logsContainerElement.scrollTop = this.logsContainerElement.scrollHeight;
+        // Use requestAnimationFrame for smooth, non-blocking scroll
+        requestAnimationFrame(() => {
+            if (this.logsContainerElement) {
+                this.logsContainerElement.scrollTop = this.logsContainerElement.scrollHeight;
+            }
+        });
     }
 }
 

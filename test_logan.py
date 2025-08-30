@@ -12,8 +12,8 @@ from logan import Logan
 def test_logan():
     print("Testing Logan log viewer...")
     
-    # Initialize Logan on port 5001 to avoid AirPlay conflict
-    Logan.init(port=5001)
+    # Initialize Logan (will automatically find an available port)
+    Logan.init()
     
     # Give server time to start
     time.sleep(1)
@@ -33,7 +33,7 @@ def test_logan():
     # Test default namespace
     Logan.log("Message with default namespace")
     
-    print("\n✅ Test completed! Check the web interface at http://localhost:5001")
+    print(f"\n✅ Test completed! Logan is running - check the web interface!")
     print("Press Ctrl+C to exit")
     
     # Keep the script running so server stays alive

@@ -3,6 +3,7 @@ import threading
 import time
 import traceback
 import inspect
+import socket
 from datetime import datetime
 from typing import Optional
 import requests
@@ -13,17 +14,22 @@ class Logan:
     _server = None
     _server_thread = None
     _server_url = None
+    _port = None
     
     @classmethod
-    def init(cls, port: int = 5000):
-        """Initialize Logan log viewer and start the Flask server."""
+    def init(cls, max_port_attempts: int = 100):
+        """Initialize Logan log viewer and start the Flask server on an available port."""
         if cls._server is not None:
             print("Logan server is already running")
             return
         
+        # Find an available port
+        port = cls._find_available_port(start_port=5000, max_attempts=max_port_attempts)
+        
         cls._server = LoganServer(port=port)
         cls._server_thread = threading.Thread(target=cls._server.run, daemon=True)
         cls._server_thread.start()
+        cls._port = port
         
         # Wait a moment for server to start
         time.sleep(0.5)
@@ -31,6 +37,26 @@ class Logan:
         
         # Display ASCII art and URL
         cls._display_startup_message(port)
+    
+    @classmethod
+    def _find_available_port(cls, start_port: int = 5000, max_attempts: int = 100):
+        """Find an available port starting from start_port."""
+        for i in range(max_attempts):
+            port = start_port + i
+            if cls._is_port_available(port):
+                return port
+        
+        raise RuntimeError(f"Could not find an available port after trying {max_attempts} ports starting from {start_port}")
+    
+    @classmethod
+    def _is_port_available(cls, port: int) -> bool:
+        """Check if a port is available for use."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            try:
+                sock.bind(('localhost', port))
+                return True
+            except OSError:
+                return False
     
     @classmethod
     def log(cls, message: str, type: str = "info", namespace: str = "global", exception: Optional[Exception] = None):
@@ -85,15 +111,13 @@ class Logan:
         
         # ANSI color codes for eye-catching display
         GREEN = '\033[92m'
-        CYAN = '\033[96m'
         BOLD = '\033[1m'
         RESET = '\033[0m'
         
-        print(f"\n{GREEN}{BOLD}")
-        print(ascii_art)
-        print(f"{RESET}")
-        print(f"{CYAN}{BOLD}🌐 Logan Log Viewer is running!{RESET}")
-        print(f"{CYAN}   👀 View logs at: {BOLD}http://localhost:{port}{RESET}")
+        print(f"\n{GREEN}{BOLD}---------------------------------------------------")
+        print(ascii_art + "\n")
+        print(f"👀 View logs at: {BOLD}http://localhost:{port}")
+        print(f"---------------------------------------------------{RESET}")
         print()
     
     @classmethod

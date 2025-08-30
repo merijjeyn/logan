@@ -51,17 +51,37 @@ body {
     font-size: 0.9rem;
 }
 
-.filter-group select {
-    padding: 8px 12px;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background: #3a3a3a;
-    color: #e0e0e0;
-    min-width: 120px;
+.filter-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-.filter-group select[multiple] {
-    min-height: 80px;
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: #3a3a3a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.toggle-label:hover {
+    background: #4a4a4a;
+}
+
+.toggle-label input[type="checkbox"] {
+    margin: 0;
+}
+
+.toggle-label input[type="checkbox"]:checked + span,
+.toggle-label:has(input[type="checkbox"]:checked) {
+    background: #555;
+    color: #ffffff;
 }
 
 button {
@@ -89,6 +109,24 @@ button {
 
 #clear-logs:hover {
     background-color: #b71c1c;
+}
+
+#auto-scroll-toggle {
+    background-color: #388e3c;
+    color: white;
+}
+
+#auto-scroll-toggle:hover {
+    background-color: #2e7d32;
+}
+
+#auto-scroll-toggle.auto-scroll-disabled {
+    background-color: #757575;
+    color: #e0e0e0;
+}
+
+#auto-scroll-toggle.auto-scroll-disabled:hover {
+    background-color: #616161;
 }
 
 .logs-container {
@@ -211,7 +249,7 @@ button {
     border-top: 1px solid #404040;
     background-color: #252525;
     display: none;
-    max-height: 200px;
+    max-height: 500px;
     overflow-y: auto;
 }
 

@@ -5,6 +5,7 @@ class LogViewer {
         this.namespaces = new Set(['global']);
         this.eventSource = null;
         this.currentExpandedIndex = null;
+        this.autoScrollEnabled = true;
         
         this.initializeElements();
         this.attachEventListeners();
@@ -14,24 +15,30 @@ class LogViewer {
     initializeElements() {
         this.logsContainer = document.getElementById('logs');
         this.noLogsElement = document.getElementById('no-logs');
-        this.typeFilter = document.getElementById('type-filter');
-        this.namespaceFilter = document.getElementById('namespace-filter');
+        this.typeFilters = document.getElementById('type-filters');
+        this.namespaceFilters = document.getElementById('namespace-filters');
         this.clearFiltersBtn = document.getElementById('clear-filters');
         this.clearLogsBtn = document.getElementById('clear-logs');
-        
-        // Select all types by default
-        Array.from(this.typeFilter.options).forEach(option => {
-            option.selected = true;
-        });
+        this.autoScrollToggle = document.getElementById('auto-scroll-toggle');
+        this.logsContainerElement = document.getElementById('logs-container');
     }
     
     attachEventListeners() {
-        this.typeFilter.addEventListener('change', () => this.applyFilters());
-        this.namespaceFilter.addEventListener('change', () => this.applyFilters());
+        // Add event listeners for type filter checkboxes
+        this.typeFilters.addEventListener('change', () => this.applyFilters());
+        
+        // Add event listeners for namespace filter checkboxes  
+        this.namespaceFilters.addEventListener('change', () => this.applyFilters());
         
         this.clearFiltersBtn.addEventListener('click', () => {
-            Array.from(this.typeFilter.options).forEach(option => option.selected = true);
-            Array.from(this.namespaceFilter.options).forEach(option => option.selected = true);
+            // Check all type filters
+            this.typeFilters.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            // Check all namespace filters
+            this.namespaceFilters.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
             this.applyFilters();
         });
         
@@ -39,6 +46,22 @@ class LogViewer {
             this.logs = [];
             this.filteredLogs = [];
             this.renderLogs();
+        });
+        
+        // Auto-scroll toggle button
+        this.autoScrollToggle.addEventListener('click', () => {
+            this.toggleAutoScroll();
+        });
+        
+        // Keyboard shortcut for auto-scroll toggle
+        document.addEventListener('keydown', (event) => {
+            if (event.key.toLowerCase() === 's' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                // Only trigger if not typing in an input field
+                if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    this.toggleAutoScroll();
+                }
+            }
         });
     }
     
@@ -69,31 +92,46 @@ class LogViewer {
         }
         
         this.applyFilters();
-        this.scrollToBottom();
+        if (this.autoScrollEnabled) {
+            this.scrollToBottom();
+        }
     }
     
     updateNamespaceFilter(newNamespace = null) {
-        const currentSelection = Array.from(this.namespaceFilter.selectedOptions).map(opt => opt.value);
+        const currentCheckboxes = this.namespaceFilters.querySelectorAll('input[type="checkbox"]');
+        const currentSelection = Array.from(currentCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
         
-        this.namespaceFilter.innerHTML = '';
+        this.namespaceFilters.innerHTML = '';
         
         Array.from(this.namespaces).sort().forEach(namespace => {
-            const option = document.createElement('option');
-            option.value = namespace;
-            option.textContent = namespace;
+            const label = document.createElement('label');
+            label.className = 'toggle-label';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = namespace;
+            
             // Auto-select new namespaces, or maintain current selection for existing ones
             if (newNamespace && namespace === newNamespace) {
-                option.selected = true; // Always select new namespaces
+                checkbox.checked = true; // Always select new namespaces
             } else {
-                option.selected = currentSelection.length === 0 || currentSelection.includes(namespace);
+                checkbox.checked = currentSelection.length === 0 || currentSelection.includes(namespace);
             }
-            this.namespaceFilter.appendChild(option);
+            
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + namespace));
+            
+            this.namespaceFilters.appendChild(label);
         });
     }
     
     applyFilters() {
-        const selectedTypes = Array.from(this.typeFilter.selectedOptions).map(opt => opt.value);
-        const selectedNamespaces = Array.from(this.namespaceFilter.selectedOptions).map(opt => opt.value);
+        const selectedTypes = Array.from(this.typeFilters.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        const selectedNamespaces = Array.from(this.namespaceFilters.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
         
         this.filteredLogs = this.logs.filter(log => {
             const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(log.type);
@@ -199,9 +237,22 @@ class LogViewer {
         return div.innerHTML;
     }
     
+    toggleAutoScroll() {
+        this.autoScrollEnabled = !this.autoScrollEnabled;
+        
+        if (this.autoScrollEnabled) {
+            this.autoScrollToggle.textContent = 'Auto-scroll (S)';
+            this.autoScrollToggle.className = 'auto-scroll-enabled';
+            // Scroll to bottom when re-enabling auto-scroll
+            this.scrollToBottom();
+        } else {
+            this.autoScrollToggle.textContent = 'Auto-scroll OFF (S)';
+            this.autoScrollToggle.className = 'auto-scroll-disabled';
+        }
+    }
+    
     scrollToBottom() {
-        const logsContainer = document.getElementById('logs-container');
-        logsContainer.scrollTop = logsContainer.scrollHeight;
+        this.logsContainerElement.scrollTop = this.logsContainerElement.scrollHeight;
     }
 }
 

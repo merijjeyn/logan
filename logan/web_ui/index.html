@@ -12,22 +12,33 @@
             <h1>Logan Log Viewer</h1>
             <div class="filters">
                 <div class="filter-group">
-                    <label for="type-filter">Filter by Type:</label>
-                    <select id="type-filter" multiple>
-                        <option value="info">Info</option>
-                        <option value="warning">Warning</option>
-                        <option value="error">Error</option>
-                        <option value="debug">Debug</option>
-                    </select>
+                    <label>Filter by Type:</label>
+                    <div class="filter-toggles" id="type-filters">
+                        <label class="toggle-label">
+                            <input type="checkbox" value="info" checked> Info
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" value="warning" checked> Warning
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" value="error" checked> Error
+                        </label>
+                        <label class="toggle-label">
+                            <input type="checkbox" value="debug" checked> Debug
+                        </label>
+                    </div>
                 </div>
                 <div class="filter-group">
-                    <label for="namespace-filter">Filter by Namespace:</label>
-                    <select id="namespace-filter" multiple>
-                        <option value="global">global</option>
-                    </select>
+                    <label>Filter by Namespace:</label>
+                    <div class="filter-toggles" id="namespace-filters">
+                        <label class="toggle-label">
+                            <input type="checkbox" value="global" checked> global
+                        </label>
+                    </div>
                 </div>
                 <button id="clear-filters">Clear Filters</button>
                 <button id="clear-logs">Clear Logs</button>
+                <button id="auto-scroll-toggle" class="auto-scroll-enabled">Auto-scroll (S)</button>
             </div>
         </header>
         

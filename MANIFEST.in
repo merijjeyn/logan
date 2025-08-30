@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+recursive-include logan/web_ui *
+recursive-include logan/assets *

@@ -2,7 +2,7 @@ import json
 import threading
 from queue import Queue
 from flask import Flask, render_template_string, request, Response, send_from_directory
-import pkg_resources
+from importlib import resources
 import os
 from waitress import serve
 import multiprocessing
@@ -80,13 +80,12 @@ class LoganServer:
         
         @self.app.route('/web_ui/<path:filename>')
         def serve_static(filename):
-            web_ui_dir = pkg_resources.resource_filename('logan', 'web_ui')
+            web_ui_dir = str(resources.files('logan') / 'web_ui')
             return send_from_directory(web_ui_dir, filename)
     
     def serve_web_ui(self):
-        web_ui_path = pkg_resources.resource_filename('logan', 'web_ui/index.html')
-        with open(web_ui_path, 'r') as f:
-            return f.read()
+        web_ui_file = resources.files('logan') / 'web_ui' / 'index.html'
+        return web_ui_file.read_text(encoding='utf-8')
     
     
     def _graceful_exit(self):

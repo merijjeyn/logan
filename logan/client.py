@@ -59,7 +59,7 @@ class Logan:
     def _log(cls, message: str, type: str = "info", namespace: str = "global", exception: Optional[Exception] = None):
         """Send a log message to the Logan server."""
         if cls._server is None:
-            print("Logan not initialized. Call Logan.init() first.")
+            cls._log_to_console(message, type, namespace, exception)
             return
         
         # Get caller information for callstack
@@ -102,6 +102,54 @@ class Logan:
             pass
     
     @classmethod
+    def _log_to_console(cls, message: str, type: str, namespace: str, exception: Optional[Exception] = None):
+        """Log message to console when server is not initialized."""
+        # ANSI color codes
+        colors = {
+            "info": "\033[94m",     # Blue
+            "warn": "\033[93m",     # Yellow
+            "error": "\033[91m",    # Red
+            "debug": "\033[90m",    # Gray
+        }
+        
+        # Type symbols
+        symbols = {
+            "info": "ℹ",
+            "warn": "⚠",
+            "error": "✗",
+            "debug": "○",
+        }
+        
+        reset = "\033[0m"
+        bold = "\033[1m"
+        dim = "\033[2m"
+        
+        # Get timestamp
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        
+        # Format the log line
+        color = colors.get(type, colors["info"])
+        symbol = symbols.get(type, symbols["info"])
+        
+        # Build the log line
+        log_line = f"{dim}{timestamp}{reset} {color}{bold}{symbol} {type.upper()}{reset}"
+        
+        if namespace != "global":
+            log_line += f" {dim}[{namespace}]{reset}"
+        
+        log_line += f" {message}"
+        
+        print(log_line)
+        
+        # Print exception if provided
+        if exception:
+            print(f"{color}  └─ Exception: {str(exception)}{reset}")
+            if hasattr(exception, '__traceback__') and exception.__traceback__:
+                tb_lines = traceback.format_exception(exception.__class__, exception, exception.__traceback__)
+                for line in tb_lines[1:]:  # Skip the first line (redundant)
+                    print(f"{dim}     {line.rstrip()}{reset}")
+    
+    @classmethod
     def _display_startup_message(cls, port: int):
         """Display the startup message with ASCII art."""
         ascii_art = cls._load_ascii_art()
@@ -120,10 +168,10 @@ class Logan:
     @classmethod
     def _load_ascii_art(cls):
         """Load ASCII art from file."""
-        import pkg_resources
-        ascii_art_path = pkg_resources.resource_filename('logan', 'assets/ascii_art.txt')
-        with open(ascii_art_path, 'r', encoding='utf-8') as f:
-            return f.read()
+        from importlib import resources
+        
+        ascii_art_file = resources.files('logan') / 'assets' / 'ascii_art.txt'
+        return ascii_art_file.read_text(encoding='utf-8')
     
     @classmethod
     def info(cls, message: str, namespace: str = "global"):

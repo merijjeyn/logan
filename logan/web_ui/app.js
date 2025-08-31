@@ -241,6 +241,11 @@ class LogViewer {
     renderLogDetails(log) {
         let detailsHTML = '';
         
+        // Show full message first
+        detailsHTML += '<div class="full-message"><h4>Full Message:</h4>';
+        detailsHTML += `<div class="full-message-content">${this.escapeHtml(log.message)}</div>`;
+        detailsHTML += '</div>';
+        
         // Render exception first (above regular callstack)
         if (log.exception) {
             detailsHTML += '<div class="exception"><h4>Exception Traceback:</h4>';

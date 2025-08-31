@@ -231,6 +231,9 @@ button {
 .log-message {
     flex: 1;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .log-namespace {
@@ -257,11 +260,11 @@ button {
     display: block;
 }
 
-.callstack, .exception {
+.callstack, .exception, .full-message {
     margin-bottom: 15px;
 }
 
-.callstack h4, .exception h4 {
+.callstack h4, .exception h4, .full-message h4 {
     margin-bottom: 10px;
     color: #b0b0b0;
     font-size: 0.9rem;
@@ -286,6 +289,18 @@ button {
     white-space: pre-wrap;
     color: #ff8a80;
     border: 1px solid #5d2a2a;
+}
+
+.full-message-content {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    word-break: break-word;
 }
 
 .hidden {

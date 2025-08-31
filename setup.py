@@ -9,6 +9,7 @@ setup(
         "flask>=2.0.0",
         "requests>=2.20.0",
         "setuptools>=40.0.0",
+        "waitress>=2.0.0",
     ],
     include_package_data=True,
     package_data={

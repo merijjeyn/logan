@@ -4,6 +4,7 @@ from queue import Queue
 from flask import Flask, render_template_string, request, Response, send_from_directory
 import pkg_resources
 import os
+from waitress import serve
 
 
 class LoganServer:
@@ -64,7 +65,6 @@ class LoganServer:
             
             response = Response(generate(), mimetype='text/event-stream')
             response.headers['Cache-Control'] = 'no-cache'
-            response.headers['Connection'] = 'keep-alive'
             response.headers['Access-Control-Allow-Origin'] = '*'
             return response
         
@@ -80,4 +80,4 @@ class LoganServer:
     
     
     def run(self):
-        self.app.run(host='0.0.0.0', port=self.port, debug=False, threaded=True)
+        serve(self.app, host='0.0.0.0', port=self.port, threads=6)

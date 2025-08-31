@@ -59,7 +59,7 @@ class Logan:
                 return False
     
     @classmethod
-    def log(cls, message: str, type: str = "info", namespace: str = "global", exception: Optional[Exception] = None):
+    def _log(cls, message: str, type: str = "info", namespace: str = "global", exception: Optional[Exception] = None):
         """Send a log message to the Logan server."""
         if cls._server is None:
             print("Logan not initialized. Call Logan.init() first.")
@@ -127,3 +127,23 @@ class Logan:
         ascii_art_path = pkg_resources.resource_filename('logan', 'assets/ascii_art.txt')
         with open(ascii_art_path, 'r', encoding='utf-8') as f:
             return f.read()
+    
+    @classmethod
+    def info(cls, message: str, namespace: str = "global"):
+        """Log an info message."""
+        cls._log(message, type="info", namespace=namespace)
+    
+    @classmethod
+    def warn(cls, message: str, namespace: str = "global"):
+        """Log a warning message."""
+        cls._log(message, type="warn", namespace=namespace)
+    
+    @classmethod
+    def error(cls, message: str, namespace: str = "global", exception: Optional[Exception] = None):
+        """Log an error message."""
+        cls._log(message, type="error", namespace=namespace, exception=exception)
+    
+    @classmethod
+    def debug(cls, message: str, namespace: str = "global"):
+        """Log a debug message."""
+        cls._log(message, type="debug", namespace=namespace)

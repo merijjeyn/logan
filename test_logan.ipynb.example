@@ -11,33 +11,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/Users/mericungor/Projects/logan/logan/server.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n",
-      "  import pkg_resources\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "\u001b[92m\u001b[1m---------------------------------------------------\n",
-      "╦  ┌─┐┌─┐┌─┐┌┐┌\n",
-      "║  │ ││ ┬├─┤│││\n",
-      "╩═╝└─┘└─┘┴ ┴┘└┘\n",
-      "\n",
-      "👀 View logs at: \u001b[1mhttp://localhost:5002\n",
-      "---------------------------------------------------\u001b[0m\n",
-      "\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# Import the Logan package\n",
     "from logan import Logan\n",
@@ -58,26 +34,26 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
     "# Test info logs\n",
-    "Logan.log(\"Application started successfully\", type=\"info\", namespace=\"app\")\n",
-    "Logan.log(\"User logged in\", type=\"info\", namespace=\"auth\")\n",
-    "Logan.log(\"Database connection established\", type=\"info\", namespace=\"database\")"
+    "Logan.info(\"Application started successfully\", namespace=\"app\")\n",
+    "Logan.info(\"User logged in\", namespace=\"auth\")\n",
+    "Logan.info(\"Database connection established\", namespace=\"database\")"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
     "# Test warning logs\n",
-    "Logan.log(\"API rate limit approaching\", type=\"warning\", namespace=\"api\")\n",
-    "Logan.log(\"Memory usage is high\", type=\"warning\", namespace=\"system\")\n",
-    "Logan.log(\"Deprecated function called\", type=\"warning\", namespace=\"app\")"
+    "Logan.warn(\"API rate limit approaching\", namespace=\"api\")\n",
+    "Logan.warn(\"Memory usage is high\", namespace=\"system\")\n",
+    "Logan.warn(\"Deprecated function called\", namespace=\"app\")"
    ]
   },
   {
@@ -87,9 +63,9 @@
    "outputs": [],
    "source": [
     "# Test error logs\n",
-    "Logan.log(\"Failed to connect to external service\", type=\"error\", namespace=\"api\")\n",
-    "Logan.log(\"Configuration file not found\", type=\"error\", namespace=\"config\")\n",
-    "Logan.log(\"Invalid user credentials\", type=\"error\", namespace=\"auth\")"
+    "Logan.error(\"Failed to connect to external service\", namespace=\"api\")\n",
+    "Logan.error(\"Configuration file not found\", namespace=\"config\")\n",
+    "Logan.error(\"Invalid user credentials\", namespace=\"auth\")"
    ]
   },
   {
@@ -99,34 +75,22 @@
    "outputs": [],
    "source": [
     "# Test debug logs\n",
-    "Logan.log(\"Processing user request\", type=\"debug\", namespace=\"request\")\n",
-    "Logan.log(\"Cache hit for user data\", type=\"debug\", namespace=\"cache\")\n",
-    "Logan.log(\"SQL query executed in 23ms\", type=\"debug\", namespace=\"database\")"
+    "Logan.debug(\"Processing user request\", namespace=\"request\")\n",
+    "Logan.debug(\"Cache hit for user data\", namespace=\"cache\")\n",
+    "Logan.debug(\"SQL query executed in 23ms\", namespace=\"database\")"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": null,
    "metadata": {},
-   "outputs": [
-    {
-     "ename": "KeyboardInterrupt",
-     "evalue": "",
-     "output_type": "error",
-     "traceback": [
-      "\u001b[31m---------------------------------------------------------------------------\u001b[39m",
-      "\u001b[31mKeyboardInterrupt\u001b[39m                         Traceback (most recent call last)",
-      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[4]\u001b[39m\u001b[32m, line 4\u001b[39m\n\u001b[32m      2\u001b[39m     namespace = i % \u001b[32m15\u001b[39m\n\u001b[32m      3\u001b[39m     Logan.log(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mBatch processing item \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mi+\u001b[32m1\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m/1000\u001b[39m\u001b[33m\"\u001b[39m, \u001b[38;5;28mtype\u001b[39m=\u001b[33m\"\u001b[39m\u001b[33mdebug\u001b[39m\u001b[33m\"\u001b[39m, namespace=\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mbatch_\u001b[39m\u001b[38;5;132;01m{\u001b[39;00mnamespace\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m\"\u001b[39m)\n\u001b[32m----> \u001b[39m\u001b[32m4\u001b[39m     \u001b[43mtime\u001b[49m\u001b[43m.\u001b[49m\u001b[43msleep\u001b[49m\u001b[43m(\u001b[49m\u001b[32;43m0.1\u001b[39;49m\u001b[43m)\u001b[49m  \u001b[38;5;66;03m# Small delay to see the real-time updates\u001b[39;00m\n\u001b[32m      5\u001b[39m Logan.log(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mBatch processing completed\u001b[39m\u001b[33m\"\u001b[39m, \u001b[38;5;28mtype\u001b[39m=\u001b[33m\"\u001b[39m\u001b[33mdebug\u001b[39m\u001b[33m\"\u001b[39m, namespace=\u001b[33m\"\u001b[39m\u001b[33mbatch\u001b[39m\u001b[33m\"\u001b[39m)\n",
-      "\u001b[31mKeyboardInterrupt\u001b[39m: "
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "for i in range(1010):\n",
     "    namespace = i % 15\n",
-    "    Logan.log(f\"Batch processing item {i+1}/1000\", type=\"debug\", namespace=f\"batch_{namespace}\")\n",
+    "    Logan.debug(f\"Batch processing item {i+1}/1000\", namespace=f\"batch_{namespace}\")\n",
     "    time.sleep(0.1)  # Small delay to see the real-time updates\n",
-    "Logan.log(f\"Batch processing completed\", type=\"debug\", namespace=\"batch\")\n"
+    "Logan.debug(f\"Batch processing completed\", namespace=\"batch\")\n"
    ]
   },
   {
@@ -149,20 +113,20 @@
     "    # Simulate a division by zero error\n",
     "    result = 10 / 0\n",
     "except Exception as e:\n",
-    "    Logan.log(\"Math operation failed\", type=\"error\", namespace=\"math\", exception=e)\n",
+    "    Logan.error(\"Math operation failed\", namespace=\"math\", exception=e)\n",
     "\n",
     "try:\n",
     "    # Simulate a file not found error\n",
     "    with open(\"nonexistent_file.txt\", \"r\") as f:\n",
     "        content = f.read()\n",
     "except Exception as e:\n",
-    "    Logan.log(\"File operation failed\", type=\"error\", namespace=\"fileio\", exception=e)\n",
+    "    Logan.error(\"File operation failed\", namespace=\"fileio\", exception=e)\n",
     "\n",
     "try:\n",
     "    # Simulate a type error\n",
     "    result = \"string\" + 42\n",
     "except Exception as e:\n",
-    "    Logan.log(\"Type conversion failed\", type=\"error\", namespace=\"conversion\", exception=e)"
+    "    Logan.error(\"Type conversion failed\", namespace=\"conversion\", exception=e)"
    ]
   },
   {
@@ -181,7 +145,7 @@
    "outputs": [],
    "source": [
     "# Test default namespace (should be \"global\")\n",
-    "Logan.log(\"\"\"\n",
+    "Logan.info(\"\"\"\n",
     "This message uses the default namespace\n",
     "This message uses the default namespace\n",
     "This message uses the default namespace\n",
@@ -200,8 +164,8 @@
     "This message uses the default namespace\n",
     "This message uses the default namespace\n",
     "\"\"\")\n",
-    "Logan.log(\"Another message with default settings\", type=\"info\")\n",
-    "Logan.log(\"Warning with default namespace\", type=\"warning\")"
+    "Logan.info(\"Another message with default settings\")\n",
+    "Logan.warn(\"Warning with default namespace\")"
    ]
   },
   {
@@ -221,14 +185,14 @@
    "source": [
     "# Simulate a web application request processing\n",
     "def simulate_request_processing():\n",
-    "    Logan.log(\"Received new HTTP request\", type=\"info\", namespace=\"web\")\n",
-    "    Logan.log(\"Validating request parameters\", type=\"debug\", namespace=\"web\")\n",
-    "    Logan.log(\"Authenticating user\", type=\"debug\", namespace=\"auth\")\n",
-    "    Logan.log(\"User authenticated successfully\", type=\"info\", namespace=\"auth\")\n",
-    "    Logan.log(\"Querying database for user data\", type=\"debug\", namespace=\"database\")\n",
-    "    Logan.log(\"Database query completed in 150ms\", type=\"info\", namespace=\"database\")\n",
-    "    Logan.log(\"Generating response\", type=\"debug\", namespace=\"web\")\n",
-    "    Logan.log(\"Request completed successfully\", type=\"info\", namespace=\"web\")\n",
+    "    Logan.info(\"Received new HTTP request\", namespace=\"web\")\n",
+    "    Logan.debug(\"Validating request parameters\", namespace=\"web\")\n",
+    "    Logan.debug(\"Authenticating user\", namespace=\"auth\")\n",
+    "    Logan.info(\"User authenticated successfully\", namespace=\"auth\")\n",
+    "    Logan.debug(\"Querying database for user data\", namespace=\"database\")\n",
+    "    Logan.info(\"Database query completed in 150ms\", namespace=\"database\")\n",
+    "    Logan.debug(\"Generating response\", namespace=\"web\")\n",
+    "    Logan.info(\"Request completed successfully\", namespace=\"web\")\n",
     "\n",
     "# Run the simulation\n",
     "simulate_request_processing()"
@@ -242,19 +206,19 @@
    "source": [
     "# Simulate some error scenarios\n",
     "def simulate_error_scenarios():\n",
-    "    Logan.log(\"Database connection timeout\", type=\"warning\", namespace=\"database\")\n",
-    "    Logan.log(\"Retrying database connection\", type=\"info\", namespace=\"database\")\n",
-    "    Logan.log(\"Connection restored\", type=\"info\", namespace=\"database\")\n",
+    "    Logan.warn(\"Database connection timeout\", namespace=\"database\")\n",
+    "    Logan.info(\"Retrying database connection\", namespace=\"database\")\n",
+    "    Logan.info(\"Connection restored\", namespace=\"database\")\n",
     "    \n",
     "    # Simulate an actual exception\n",
     "    try:\n",
     "        # Simulate a network error\n",
     "        raise ConnectionError(\"Network unreachable\")\n",
     "    except Exception as e:\n",
-    "        Logan.log(\"Network operation failed\", type=\"error\", namespace=\"network\", exception=e)\n",
+    "        Logan.error(\"Network operation failed\", namespace=\"network\", exception=e)\n",
     "    \n",
-    "    Logan.log(\"Fallback to cached data\", type=\"warning\", namespace=\"cache\")\n",
-    "    Logan.log(\"Request completed with cached data\", type=\"info\", namespace=\"web\")\n",
+    "    Logan.warn(\"Fallback to cached data\", namespace=\"cache\")\n",
+    "    Logan.info(\"Request completed with cached data\", namespace=\"web\")\n",
     "\n",
     "# Run the error simulation\n",
     "simulate_error_scenarios()"
@@ -278,10 +242,10 @@
     "# Test rapid logging\n",
     "print(\"Sending 20 rapid log messages...\")\n",
     "for i in range(20):\n",
-    "    Logan.log(f\"Batch processing item {i+1}/20\", type=\"debug\", namespace=\"batch\")\n",
+    "    Logan.debug(f\"Batch processing item {i+1}/20\", namespace=\"batch\")\n",
     "    time.sleep(0.1)  # Small delay to see the real-time updates\n",
     "\n",
-    "Logan.log(\"Batch processing completed\", type=\"info\", namespace=\"batch\")\n",
+    "Logan.info(\"Batch processing completed\", namespace=\"batch\")\n",
     "print(\"✅ Rapid logging test completed!\")"
    ]
   },

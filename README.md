@@ -30,17 +30,17 @@ from logan import Logan
 Logan.init()
 
 # Log messages with different types and namespaces
-Logan.log("Application started", type="info", namespace="app")
-Logan.log("Database connected", type="info", namespace="db")
-Logan.log("Invalid input detected", type="warning", namespace="validation")
-Logan.log("Connection failed", type="error", namespace="network")
-Logan.log("Processing user request", type="debug", namespace="api")
+Logan.info("Application started", namespace="app")
+Logan.info("Database connected", namespace="db")
+Logan.warn("Invalid input detected", namespace="validation")
+Logan.error("Connection failed", namespace="network")
+Logan.debug("Processing user request", namespace="api")
 
 # Log exceptions with full stack traces
 try:
     result = 10 / 0
 except Exception as e:
-    Logan.log("Math operation failed", type="error", namespace="calc", exception=e)
+    Logan.error("Math operation failed", namespace="calc", exception=e)
 ```
 
 ### Web Interface
@@ -62,16 +62,25 @@ Starts the Logan web server.
 
 - `port` (int, optional): Port number for the web server. Defaults to 5000.
 
-### `Logan.log(message, type="info", namespace="global", exception=None)`
+### Logging Methods
 
-Sends a log message to the web viewer.
+#### `Logan.info(message, namespace="global")`
+Log an info message.
+
+#### `Logan.warn(message, namespace="global")`
+Log a warning message.
+
+#### `Logan.error(message, namespace="global", exception=None)`
+Log an error message. Optionally include an exception for stack trace.
+
+#### `Logan.debug(message, namespace="global")`
+Log a debug message.
 
 **Parameters:**
 
 - `message` (str): The log message
-- `type` (str, optional): Log type - "info", "warning", "error", or "debug". Defaults to "info".
 - `namespace` (str, optional): Namespace/component name for organizing logs. Defaults to "global".
-- `exception` (Exception, optional): Python exception object to include stack trace. Defaults to None.
+- `exception` (Exception, optional): Python exception object to include stack trace (error method only).
 
 ## Examples
 
@@ -86,19 +95,19 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    Logan.log("Home page accessed", type="info", namespace="web")
+    Logan.info("Home page accessed", namespace="web")
     return "Hello World"
 
 @app.route("/api/users")
 def get_users():
-    Logan.log("Fetching users from database", type="debug", namespace="api")
+    Logan.debug("Fetching users from database", namespace="api")
     try:
         # Database operation
         users = fetch_users()
-        Logan.log(f"Retrieved {len(users)} users", type="info", namespace="api")
+        Logan.info(f"Retrieved {len(users)} users", namespace="api")
         return users
     except Exception as e:
-        Logan.log("Failed to fetch users", type="error", namespace="api", exception=e)
+        Logan.error("Failed to fetch users", namespace="api", exception=e)
         return {"error": "Failed to fetch users"}, 500
 ```
 
@@ -111,28 +120,28 @@ import pandas as pd
 Logan.init()
 
 def process_data(filename):
-    Logan.log(f"Starting data processing for {filename}", namespace="pipeline")
+    Logan.info(f"Starting data processing for {filename}", namespace="pipeline")
 
     try:
         # Load data
-        Logan.log("Loading CSV file", type="debug", namespace="io")
+        Logan.debug("Loading CSV file", namespace="io")
         df = pd.read_csv(filename)
-        Logan.log(f"Loaded {len(df)} records", type="info", namespace="io")
+        Logan.info(f"Loaded {len(df)} records", namespace="io")
 
         # Process data
-        Logan.log("Applying transformations", type="debug", namespace="transform")
+        Logan.debug("Applying transformations", namespace="transform")
         df_processed = df.dropna().reset_index(drop=True)
-        Logan.log(f"Cleaned data: {len(df_processed)} records remaining", namespace="transform")
+        Logan.info(f"Cleaned data: {len(df_processed)} records remaining", namespace="transform")
 
         # Save results
         output_file = f"processed_{filename}"
         df_processed.to_csv(output_file, index=False)
-        Logan.log(f"Results saved to {output_file}", type="info", namespace="io")
+        Logan.info(f"Results saved to {output_file}", namespace="io")
 
     except FileNotFoundError as e:
-        Logan.log(f"Input file not found: {filename}", type="error", namespace="io", exception=e)
+        Logan.error(f"Input file not found: {filename}", namespace="io", exception=e)
     except Exception as e:
-        Logan.log("Unexpected error during processing", type="error", namespace="pipeline", exception=e)
+        Logan.error("Unexpected error during processing", namespace="pipeline", exception=e)
 
 process_data("data.csv")
 ```

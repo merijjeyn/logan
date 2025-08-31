@@ -3,15 +3,11 @@ class LogViewer {
         this.MAX_LOGS = 1000; // Sliding window limit
         this.logs = [];
         this.filteredLogs = [];
-        this.renderedCount = 0; // Track how many logs are already rendered
         this.namespaces = new Set(['global']);
         this.eventSource = null;
         this.currentExpandedIndex = null;
         this.autoScrollEnabled = true;
         
-        // Debounced rendering to prevent render spam
-        this.renderTimeout = null;
-        this.RENDER_DEBOUNCE_MS = 16; // ~60fps
         
         this.initializeElements();
         this.attachEventListeners();
@@ -102,6 +98,10 @@ class LogViewer {
         // Sliding window: prevent unbounded memory growth
         if (this.logs.length > this.MAX_LOGS) {
             this.logs.shift(); // Remove oldest log
+            // Remove the first DOM element as well
+            if (this.logsContainer.firstChild) {
+                this.logsContainer.removeChild(this.logsContainer.firstChild);
+            }
         }
         
         // Add namespace to the filter dropdown if it's new
@@ -111,7 +111,23 @@ class LogViewer {
             this.updateNamespaceFilter(logData.namespace);
         }
         
-        this.debouncedRender();
+        // Check if the new log passes the active filters
+        if (this.passesActiveFilters(logData)) {
+            // Add DOM element for the new log directly
+            const logIndex = this.logs.length - 1;
+            const logElement = this.createLogElement(logData, logIndex);
+            this.logsContainer.appendChild(logElement);
+            
+            // Hide the no-logs element if it's visible
+            if (this.noLogsElement.style.display !== 'none') {
+                this.noLogsElement.style.display = 'none';
+            }
+            
+            // Auto-scroll if enabled
+            if (this.autoScrollEnabled) {
+                this.scrollToBottom();
+            }
+        }
     }
     
     updateNamespaceFilter(newNamespace = null) {
@@ -145,6 +161,22 @@ class LogViewer {
     }
     
     applyFilters() {
+        this.renderLogs();
+    }
+    
+    passesActiveFilters(logData) {
+        const selectedTypes = Array.from(this.typeFilters.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        const selectedNamespaces = Array.from(this.namespaceFilters.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+        
+        const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(logData.type);
+        const namespaceMatch = selectedNamespaces.length === 0 || selectedNamespaces.includes(logData.namespace);
+        return typeMatch && namespaceMatch;
+    }
+    
+    renderLogs() {
+        // Apply filters to get the filtered logs
         const selectedTypes = Array.from(this.typeFilters.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
         const selectedNamespaces = Array.from(this.namespaceFilters.querySelectorAll('input[type="checkbox"]:checked'))
@@ -156,62 +188,33 @@ class LogViewer {
             return typeMatch && namespaceMatch;
         });
         
-        this.renderLogs();
-    }
-    
-    debouncedRender() {
-        // Cancel previous render if pending
-        if (this.renderTimeout) {
-            clearTimeout(this.renderTimeout);
-        }
+        // Clear the container and re-render all filtered logs
+        this.logsContainer.innerHTML = '';
         
-        // Schedule new render
-        this.renderTimeout = setTimeout(() => {
-            this.applyFilters();
-            if (this.autoScrollEnabled) {
-                this.scrollToBottom();
-            }
-            this.renderTimeout = null;
-        }, this.RENDER_DEBOUNCE_MS);
-    }
-    
-    renderLogs() {
         if (this.filteredLogs.length === 0) {
             this.noLogsElement.style.display = 'block';
-            this.logsContainer.innerHTML = '';
-            this.renderedCount = 0;
             return;
         }
         
         this.noLogsElement.style.display = 'none';
         
-        // Only render new logs that haven't been rendered yet
-        const newLogsCount = this.filteredLogs.length - this.renderedCount;
+        // Create document fragment for efficient DOM updates
+        const fragment = document.createDocumentFragment();
         
-        if (newLogsCount > 0) {
-            // Create document fragment for efficient DOM updates
-            const fragment = document.createDocumentFragment();
-            
-            // Only process the new logs
-            for (let i = this.renderedCount; i < this.filteredLogs.length; i++) {
-                const log = this.filteredLogs[i];
-                const logElement = this.createLogElement(log, i);
-                fragment.appendChild(logElement);
-            }
-            
-            // Add all new logs at once
-            this.logsContainer.appendChild(fragment);
-            this.renderedCount = this.filteredLogs.length;
-        }
+        // Render all filtered logs
+        this.filteredLogs.forEach((log, index) => {
+            // Use the original log index from this.logs for proper indexing
+            const originalIndex = this.logs.indexOf(log);
+            const logElement = this.createLogElement(log, originalIndex);
+            fragment.appendChild(logElement);
+        });
         
-        // Handle case where logs were removed (sliding window)
-        if (this.logsContainer.children.length > this.filteredLogs.length) {
-            // Remove excess DOM elements from the beginning
-            const excessCount = this.logsContainer.children.length - this.filteredLogs.length;
-            for (let i = 0; i < excessCount; i++) {
-                this.logsContainer.removeChild(this.logsContainer.firstChild);
-            }
-            this.renderedCount = this.filteredLogs.length;
+        // Add all logs at once
+        this.logsContainer.appendChild(fragment);
+        
+        // Auto-scroll if enabled
+        if (this.autoScrollEnabled) {
+            this.scrollToBottom();
         }
     }
     

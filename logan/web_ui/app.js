@@ -17,8 +17,14 @@ class LogViewer {
     initializeElements() {
         this.logsContainer = document.getElementById('logs');
         this.noLogsElement = document.getElementById('no-logs');
-        this.typeFilters = document.getElementById('type-filters');
-        this.namespaceFilters = document.getElementById('namespace-filters');
+        this.typeDropdown = document.getElementById('type-dropdown');
+        this.typeButton = document.getElementById('type-button');
+        this.typeOptions = document.getElementById('type-options');
+        this.typeSelected = document.getElementById('type-selected');
+        this.namespaceDropdown = document.getElementById('namespace-dropdown');
+        this.namespaceButton = document.getElementById('namespace-button');
+        this.namespaceOptions = document.getElementById('namespace-options');
+        this.namespaceSelected = document.getElementById('namespace-selected');
         this.clearFiltersBtn = document.getElementById('clear-filters');
         this.clearLogsBtn = document.getElementById('clear-logs');
         this.autoScrollToggle = document.getElementById('auto-scroll-toggle');
@@ -26,21 +32,52 @@ class LogViewer {
     }
     
     attachEventListeners() {
-        // Add event listeners for type filter checkboxes
-        this.typeFilters.addEventListener('change', () => this.applyFilters());
+        // Type dropdown event listeners
+        this.typeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleDropdown(this.typeDropdown);
+        });
         
-        // Add event listeners for namespace filter checkboxes  
-        this.namespaceFilters.addEventListener('change', () => this.applyFilters());
+        this.typeOptions.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent dropdown from closing when clicking inside
+        });
+        
+        this.typeOptions.addEventListener('change', () => {
+            this.updateDropdownDisplay(this.typeOptions, this.typeSelected, 'All Types');
+            this.applyFilters();
+        });
+        
+        // Namespace dropdown event listeners
+        this.namespaceButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleDropdown(this.namespaceDropdown);
+        });
+        
+        this.namespaceOptions.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent dropdown from closing when clicking inside
+        });
+        
+        this.namespaceOptions.addEventListener('change', () => {
+            this.updateDropdownDisplay(this.namespaceOptions, this.namespaceSelected, 'All Namespaces');
+            this.applyFilters();
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            this.closeAllDropdowns();
+        });
         
         this.clearFiltersBtn.addEventListener('click', () => {
             // Check all type filters
-            this.typeFilters.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            this.typeOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = true;
             });
             // Check all namespace filters
-            this.namespaceFilters.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            this.namespaceOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = true;
             });
+            this.updateDropdownDisplay(this.typeOptions, this.typeSelected, 'All Types');
+            this.updateDropdownDisplay(this.namespaceOptions, this.namespaceSelected, 'All Namespaces');
             this.applyFilters();
         });
         
@@ -131,16 +168,16 @@ class LogViewer {
     }
     
     updateNamespaceFilter(newNamespace = null) {
-        const currentCheckboxes = this.namespaceFilters.querySelectorAll('input[type="checkbox"]');
+        const currentCheckboxes = this.namespaceOptions.querySelectorAll('input[type="checkbox"]');
         const currentSelection = Array.from(currentCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
         
-        this.namespaceFilters.innerHTML = '';
+        this.namespaceOptions.innerHTML = '';
         
         Array.from(this.namespaces).sort().forEach(namespace => {
             const label = document.createElement('label');
-            label.className = 'toggle-label';
+            label.className = 'dropdown-option';
             
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -156,8 +193,11 @@ class LogViewer {
             label.appendChild(checkbox);
             label.appendChild(document.createTextNode(' ' + namespace));
             
-            this.namespaceFilters.appendChild(label);
+            this.namespaceOptions.appendChild(label);
         });
+        
+        // Update display after adding new namespace
+        this.updateDropdownDisplay(this.namespaceOptions, this.namespaceSelected, 'All Namespaces');
     }
     
     applyFilters() {
@@ -165,9 +205,9 @@ class LogViewer {
     }
     
     passesActiveFilters(logData) {
-        const selectedTypes = Array.from(this.typeFilters.querySelectorAll('input[type="checkbox"]:checked'))
+        const selectedTypes = Array.from(this.typeOptions.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
-        const selectedNamespaces = Array.from(this.namespaceFilters.querySelectorAll('input[type="checkbox"]:checked'))
+        const selectedNamespaces = Array.from(this.namespaceOptions.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
         
         const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(logData.type);
@@ -177,9 +217,9 @@ class LogViewer {
     
     renderLogs() {
         // Apply filters to get the filtered logs
-        const selectedTypes = Array.from(this.typeFilters.querySelectorAll('input[type="checkbox"]:checked'))
+        const selectedTypes = Array.from(this.typeOptions.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
-        const selectedNamespaces = Array.from(this.namespaceFilters.querySelectorAll('input[type="checkbox"]:checked'))
+        const selectedNamespaces = Array.from(this.namespaceOptions.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
         
         this.filteredLogs = this.logs.filter(log => {
@@ -320,6 +360,33 @@ class LogViewer {
                 this.logsContainerElement.scrollTop = this.logsContainerElement.scrollHeight;
             }
         });
+    }
+    
+    toggleDropdown(dropdown) {
+        // Close other dropdowns first
+        this.closeAllDropdowns();
+        // Toggle the clicked dropdown
+        dropdown.classList.toggle('open');
+    }
+    
+    closeAllDropdowns() {
+        this.typeDropdown.classList.remove('open');
+        this.namespaceDropdown.classList.remove('open');
+    }
+    
+    updateDropdownDisplay(optionsContainer, displayElement, defaultText) {
+        const checkedOptions = Array.from(optionsContainer.querySelectorAll('input[type="checkbox"]:checked'));
+        const allOptions = Array.from(optionsContainer.querySelectorAll('input[type="checkbox"]'));
+        
+        if (checkedOptions.length === 0) {
+            displayElement.textContent = 'None';
+        } else if (checkedOptions.length === allOptions.length) {
+            displayElement.textContent = defaultText;
+        } else if (checkedOptions.length === 1) {
+            displayElement.textContent = checkedOptions[0].value;
+        } else {
+            displayElement.textContent = `${checkedOptions.length} selected`;
+        }
     }
 }
 

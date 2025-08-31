@@ -3,37 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logan Log Viewer</title>
+    <title>Logan</title>
     <link rel="stylesheet" href="/web_ui/styles.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>Logan Log Viewer</h1>
-            <div class="filters">
-                <div class="filter-group">
-                    <label>Filter by Type:</label>
-                    <div class="filter-toggles" id="type-filters">
-                        <label class="toggle-label">
-                            <input type="checkbox" value="info" checked> Info
-                        </label>
-                        <label class="toggle-label">
-                            <input type="checkbox" value="warning" checked> Warning
-                        </label>
-                        <label class="toggle-label">
-                            <input type="checkbox" value="error" checked> Error
-                        </label>
-                        <label class="toggle-label">
-                            <input type="checkbox" value="debug" checked> Debug
-                        </label>
+            <h1>Logan</h1>
+            <div class="controls">
+                <div class="dropdown-container">
+                    <label for="type-dropdown">Types:</label>
+                    <div class="multi-select-dropdown" id="type-dropdown">
+                        <div class="dropdown-button" id="type-button">
+                            <span id="type-selected">All Types</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="dropdown-content" id="type-options">
+                            <label class="dropdown-option">
+                                <input type="checkbox" value="info" checked> Info
+                            </label>
+                            <label class="dropdown-option">
+                                <input type="checkbox" value="warning" checked> Warning
+                            </label>
+                            <label class="dropdown-option">
+                                <input type="checkbox" value="error" checked> Error
+                            </label>
+                            <label class="dropdown-option">
+                                <input type="checkbox" value="debug" checked> Debug
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="filter-group">
-                    <label>Filter by Namespace:</label>
-                    <div class="filter-toggles" id="namespace-filters">
-                        <label class="toggle-label">
-                            <input type="checkbox" value="global" checked> global
-                        </label>
+                <div class="dropdown-container">
+                    <label for="namespace-dropdown">Namespaces:</label>
+                    <div class="multi-select-dropdown" id="namespace-dropdown">
+                        <div class="dropdown-button" id="namespace-button">
+                            <span id="namespace-selected">All Namespaces</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </div>
+                        <div class="dropdown-content" id="namespace-options">
+                            <label class="dropdown-option">
+                                <input type="checkbox" value="global" checked> global
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <button id="clear-filters">Clear Filters</button>

@@ -149,6 +149,10 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 ```
 
+### Local Testing
+
+Just copy `test_logan.ipynb.example`, remove the .example suffix, and go nuts
+
 ## License
 
 MIT License - see LICENSE file for details.

@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+logan/__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -39,5 +40,4 @@ logan_env/
 Thumbs.db
 
 # Test files
-test_logan.py
-test_logan.ipynb
+*.ipynb

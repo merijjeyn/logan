@@ -89,10 +89,18 @@ class LoganServer:
             return f.read()
     
     
+    def _graceful_exit(self):
+        # Avoid heavy work in a signal handler; just exit the child proc.
+        os._exit(0)
+    
     def _setup_cleanup(self):
-        atexit.register(self.stop)
-        signal.signal(signal.SIGTERM, lambda signum, frame: self.stop())
-        signal.signal(signal.SIGINT, lambda signum, frame: self.stop())
+        # Only set signal handlers when running inside the child process.
+        # Parent should not intercept/override SIGINT (Ctrl+C) or SIGTERM.
+        import multiprocessing
+        if multiprocessing.current_process().name != "MainProcess":
+            signal.signal(signal.SIGTERM, lambda s, f: self._graceful_exit())
+            signal.signal(signal.SIGINT,  lambda s, f: self._graceful_exit())
+        # No atexit hooks in the parent; avoid blocking joins at interpreter teardown.
     
     def _run_direct(self):
         serve(self.app, host='0.0.0.0', port=self.port, threads=6)

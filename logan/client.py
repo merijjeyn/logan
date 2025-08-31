@@ -1,5 +1,4 @@
 import json
-import threading
 import time
 import traceback
 import inspect
@@ -12,7 +11,6 @@ from .server import LoganServer
 
 class Logan:
     _server = None
-    _server_thread = None
     _server_url = None
     _port = None
     
@@ -27,12 +25,11 @@ class Logan:
         port = cls._find_available_port(start_port=5000, max_attempts=max_port_attempts)
         
         cls._server = LoganServer(port=port)
-        cls._server_thread = threading.Thread(target=cls._server.run, daemon=True)
-        cls._server_thread.start()
+        cls._server.run()  # starts the multiprocessing.Process directly
         cls._port = port
         
         # Wait a moment for server to start
-        time.sleep(0.5)
+        time.sleep(0.3)  # keep a short wait or replace with a health check later
         cls._server_url = f"http://localhost:{port}"
         
         # Display ASCII art and URL

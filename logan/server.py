@@ -5,6 +5,14 @@ from flask import Flask, render_template_string, request, Response, send_from_di
 import pkg_resources
 import os
 from waitress import serve
+import multiprocessing
+import atexit
+import signal
+
+
+def _run_server_in_subprocess(port):
+    server = LoganServer(port)
+    server._run_direct()
 
 
 class LoganServer:
@@ -14,9 +22,11 @@ class LoganServer:
         self.log_queue = Queue()
         self.clients = set()
         self.lock = threading.Lock()
+        self.process = None
         
         # Setup routes
         self.setup_routes()
+        self._setup_cleanup()
     
     def setup_routes(self):
         @self.app.route('/')
@@ -79,5 +89,26 @@ class LoganServer:
             return f.read()
     
     
-    def run(self):
+    def _setup_cleanup(self):
+        atexit.register(self.stop)
+        signal.signal(signal.SIGTERM, lambda signum, frame: self.stop())
+        signal.signal(signal.SIGINT, lambda signum, frame: self.stop())
+    
+    def _run_direct(self):
         serve(self.app, host='0.0.0.0', port=self.port, threads=6)
+    
+    def run(self):
+        if self.process is not None and self.process.is_alive():
+            return
+        
+        self.process = multiprocessing.Process(target=_run_server_in_subprocess, args=(self.port,))
+        self.process.daemon = True
+        self.process.start()
+    
+    def stop(self):
+        print("Stopping server")
+        if self.process and self.process.is_alive():
+            self.process.terminate()
+            self.process.join(timeout=5)
+            if self.process.is_alive():
+                self.process.kill()

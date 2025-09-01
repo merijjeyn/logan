@@ -107,7 +107,7 @@ class Logan:
         # ANSI color codes
         colors = {
             "info": "\033[94m",     # Blue
-            "warn": "\033[93m",     # Yellow
+            "warning": "\033[93m",     # Yellow
             "error": "\033[91m",    # Red
             "debug": "\033[90m",    # Gray
         }
@@ -115,7 +115,7 @@ class Logan:
         # Type symbols
         symbols = {
             "info": "ℹ",
-            "warn": "⚠",
+            "warning": "⚠",
             "error": "✗",
             "debug": "○",
         }
@@ -181,7 +181,7 @@ class Logan:
     @classmethod
     def warn(cls, message: str, namespace: str = "global"):
         """Log a warning message."""
-        cls._log(message, type="warn", namespace=namespace)
+        cls._log(message, type="warning", namespace=namespace)
     
     @classmethod
     def error(cls, message: str, namespace: str = "global", exception: Optional[Exception] = None):

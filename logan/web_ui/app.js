@@ -7,6 +7,9 @@ class LogViewer {
         this.eventSource = null;
         this.currentExpandedIndex = null;
         this.autoScrollEnabled = true;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 10;
+        this.reconnectTimeout = null;
         
         
         this.initializeElements();
@@ -105,6 +108,11 @@ class LogViewer {
         
         // EVENT DELEGATION: Single listener for all log clicks (prevents memory leaks)
         this.logsContainer.addEventListener('click', (event) => {
+            // Don't toggle if clicking within the details panel
+            if (event.target.closest('.log-details')) {
+                return;
+            }
+            
             const logEntry = event.target.closest('.log-entry');
             if (logEntry) {
                 const index = parseInt(logEntry.dataset.index);
@@ -114,7 +122,24 @@ class LogViewer {
     }
     
     connectEventSource() {
+        // Close existing connection if it exists
+        if (this.eventSource) {
+            this.eventSource.close();
+        }
+        
+        // Clear any pending reconnection timeout
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
+        
         this.eventSource = new EventSource('/api/logs/stream');
+        
+        this.eventSource.onopen = () => {
+            console.log('EventSource connected');
+            // Reset reconnect attempts on successful connection
+            this.reconnectAttempts = 0;
+        };
         
         this.eventSource.onmessage = (event) => {
             const logData = JSON.parse(event.data);
@@ -125,7 +150,25 @@ class LogViewer {
         
         this.eventSource.onerror = (error) => {
             console.error('EventSource failed:', error);
-            setTimeout(() => this.connectEventSource(), 5000);
+            
+            // Close the failed connection
+            if (this.eventSource) {
+                this.eventSource.close();
+                this.eventSource = null;
+            }
+            
+            // Only attempt reconnection if we haven't exceeded max attempts
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                this.reconnectAttempts++;
+                const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000); // Exponential backoff, max 30s
+                console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+                
+                this.reconnectTimeout = setTimeout(() => {
+                    this.connectEventSource();
+                }, delay);
+            } else {
+                console.error('Max reconnection attempts reached. Server appears to be down.');
+            }
         };
     }
     

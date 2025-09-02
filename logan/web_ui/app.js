@@ -1,6 +1,6 @@
 class LogViewer {
     constructor() {
-        this.MAX_LOGS = 2000; // Sliding window limit
+        this.MAX_LOGS = 1000; // Sliding window limit
         this.logs = [];
         this.filteredLogs = [];
         this.namespaces = new Set(['global']);

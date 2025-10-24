@@ -1,6 +1,6 @@
 class LogViewer {
     constructor() {
-        this.MAX_LOGS = 1000; // Sliding window limit
+        this.MAX_LOGS = 1500; // Sliding window limit
         this.logs = [];
         this.filteredLogs = [];
         this.namespaces = new Set(['global']);
@@ -10,8 +10,9 @@ class LogViewer {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 10;
         this.reconnectTimeout = null;
-        
-        
+        this.logCounter = 0; // Monotonically increasing log index
+
+
         this.initializeElements();
         this.attachEventListeners();
         this.connectEventSource();
@@ -173,8 +174,12 @@ class LogViewer {
     }
     
     addLog(logData) {
+        // Assign a stable, monotonically increasing index to this log
+        const absoluteIndex = this.logCounter++;
+        logData._index = absoluteIndex;
+
         this.logs.push(logData);
-        
+
         // Sliding window: prevent unbounded memory growth
         if (this.logs.length > this.MAX_LOGS) {
             this.logs.shift(); // Remove oldest log
@@ -183,26 +188,25 @@ class LogViewer {
                 this.logsContainer.removeChild(this.logsContainer.firstChild);
             }
         }
-        
+
         // Add namespace to the filter dropdown if it's new
         const isNewNamespace = !this.namespaces.has(logData.namespace);
         if (isNewNamespace) {
             this.namespaces.add(logData.namespace);
             this.updateNamespaceFilter(logData.namespace);
         }
-        
+
         // Check if the new log passes the active filters
         if (this.passesActiveFilters(logData)) {
-            // Add DOM element for the new log directly
-            const logIndex = this.logs.length - 1;
-            const logElement = this.createLogElement(logData, logIndex);
+            // Add DOM element for the new log directly using its absolute index
+            const logElement = this.createLogElement(logData, absoluteIndex);
             this.logsContainer.appendChild(logElement);
-            
+
             // Hide the no-logs element if it's visible
             if (this.noLogsElement.style.display !== 'none') {
                 this.noLogsElement.style.display = 'none';
             }
-            
+
             // Auto-scroll if enabled
             if (this.autoScrollEnabled) {
                 this.scrollToBottom();
@@ -264,37 +268,35 @@ class LogViewer {
             .map(cb => cb.value);
         const selectedNamespaces = Array.from(this.namespaceOptions.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value);
-        
+
         this.filteredLogs = this.logs.filter(log => {
             const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(log.type);
             const namespaceMatch = selectedNamespaces.length === 0 || selectedNamespaces.includes(log.namespace);
             return typeMatch && namespaceMatch;
         });
-        
+
         // Clear the container and re-render all filtered logs
         this.logsContainer.innerHTML = '';
-        
+
         if (this.filteredLogs.length === 0) {
             this.noLogsElement.style.display = 'block';
             return;
         }
-        
+
         this.noLogsElement.style.display = 'none';
-        
+
         // Create document fragment for efficient DOM updates
         const fragment = document.createDocumentFragment();
-        
-        // Render all filtered logs
-        this.filteredLogs.forEach((log, index) => {
-            // Use the original log index from this.logs for proper indexing
-            const originalIndex = this.logs.indexOf(log);
-            const logElement = this.createLogElement(log, originalIndex);
+
+        // Render all filtered logs using their stable absolute indices
+        this.filteredLogs.forEach((log) => {
+            const logElement = this.createLogElement(log, log._index);
             fragment.appendChild(logElement);
         });
-        
+
         // Add all logs at once
         this.logsContainer.appendChild(fragment);
-        
+
         // Auto-scroll if enabled
         if (this.autoScrollEnabled) {
             this.scrollToBottom();

@@ -17,8 +17,13 @@ class Logan:
     _logging_handler = None
 
     @classmethod
-    def init(cls, max_port_attempts: int = 100, logging_handler: Optional[logging.Handler] = None):
+    def init(cls, max_port_attempts: int = 100, logging_handler: Optional[logging.Handler] = None, no_server: bool = False):
         """Initialize Logan log viewer and start the Flask server on an available port."""
+        cls._logging_handler = logging_handler
+
+        if no_server:
+            return
+        
         if cls._server is not None:
             print("Logan server is already running")
             return
@@ -29,7 +34,6 @@ class Logan:
         cls._server = LoganServer(port=port)
         cls._server.run()  # starts the multiprocessing.Process directly
         cls._port = port
-        cls._logging_handler = logging_handler
 
         # Wait a moment for server to start
         time.sleep(0.3)  # keep a short wait or replace with a health check later

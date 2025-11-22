@@ -3,6 +3,7 @@ import time
 import traceback
 import inspect
 import socket
+import logging
 from datetime import datetime
 from typing import Optional
 import requests
@@ -13,9 +14,10 @@ class Logan:
     _server = None
     _server_url = None
     _port = None
-    
+    _logging_handler = None
+
     @classmethod
-    def init(cls, max_port_attempts: int = 100):
+    def init(cls, max_port_attempts: int = 100, logging_handler: Optional[logging.Handler] = None):
         """Initialize Logan log viewer and start the Flask server on an available port."""
         if cls._server is not None:
             print("Logan server is already running")
@@ -27,11 +29,12 @@ class Logan:
         cls._server = LoganServer(port=port)
         cls._server.run()  # starts the multiprocessing.Process directly
         cls._port = port
-        
+        cls._logging_handler = logging_handler
+
         # Wait a moment for server to start
         time.sleep(0.3)  # keep a short wait or replace with a health check later
         cls._server_url = f"http://localhost:{port}"
-        
+
         # Display ASCII art and URL
         cls._display_startup_message(port)
     
@@ -91,7 +94,11 @@ class Logan:
                 "message": str(exception),
                 "traceback": traceback.format_exception(exception.__class__, exception, exception.__traceback__)
             }
-        
+
+        # Route to logging handler if provided
+        if cls._logging_handler:
+            cls._send_to_logging_handler(message, type, namespace, callstack, exception)
+
         # Send log to server
         try:
             response = requests.post(f"{cls._server_url}/api/log", json=log_entry, timeout=1)
@@ -101,6 +108,48 @@ class Logan:
             # Server might not be ready yet, ignore silently
             pass
     
+    @classmethod
+    def _send_to_logging_handler(cls, message: str, type: str, namespace: str, callstack: list, exception: Optional[Exception] = None):
+        """Send log to the provided logging handler."""
+        # Map Logan log types to logging levels
+        level_map = {
+            "info": logging.INFO,
+            "warning": logging.WARNING,
+            "error": logging.ERROR,
+            "debug": logging.DEBUG,
+        }
+        level = level_map.get(type, logging.INFO)
+
+        # Get caller info from callstack (first non-Logan frame)
+        pathname = __file__
+        lineno = 0
+        func_name = "<unknown>"
+        if callstack:
+            first_call = callstack[0]
+            pathname = first_call.get("file", __file__)
+            lineno = first_call.get("line", 0)
+            func_name = first_call.get("function", "<unknown>")
+
+        # Create exc_info tuple if exception is provided
+        exc_info = None
+        if exception:
+            exc_info = (exception.__class__, exception, exception.__traceback__)
+
+        # Create LogRecord
+        record = logging.LogRecord(
+            name=f"logan.{namespace}",
+            level=level,
+            pathname=pathname,
+            lineno=lineno,
+            msg=message,
+            args=(),
+            exc_info=exc_info,
+            func=func_name
+        )
+
+        # Send to handler
+        cls._logging_handler.handle(record)
+
     @classmethod
     def _log_to_console(cls, message: str, type: str, namespace: str, exception: Optional[Exception] = None):
         """Log message to console when server is not initialized."""
